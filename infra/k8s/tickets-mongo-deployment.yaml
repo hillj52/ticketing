@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickets-mongo-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tickets-mongo
+  template:
+    metadata:
+      labels:
+        app: tickets-mongo
+    spec:
+      containers:
+      - name: tickets-mongo
+        image: mongo
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: tickets-mongo-secret
+              key: mongo-root-username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: tickets-mongo-secret
+              key: mongo-root-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tickets-mongo-service
+spec:
+  selector:
+    app: tickets-mongo
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017
